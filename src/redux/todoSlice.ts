@@ -1,28 +1,33 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import { fetchTodos } from "../helpers/fetchTodos";
+import type { Todo, TodosState } from "../types/types";
 
-// Action
-export const fetchTodos = createAsyncThunk("fetchTodos", async () => {
-  const response = await fetch("https://jsonplaceholder.typicode.com/todos");
-  return response.json();
-});
+// 3. Define initial state
+export const initialState: TodosState = {
+  todos: [],
+  isLoading: false,
+  error: null,
+};
 
 const todoSlice = createSlice({
   name: "todos",
-  initialState: {
-    todos: [],
-    isLoaiding: false,
-    error: null,
-  },
+  initialState,
+  reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchTodos.pending, (state) => {
-      state.isLoaiding = true;
+      state.isLoading = true;
     });
-    builder.addCase(fetchTodos.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.todos = action.payload;
-    });
+    builder.addCase(
+      fetchTodos.fulfilled,
+      (state, action: PayloadAction<Todo[]>) => {
+        state.isLoading = false;
+        state.todos = action.payload;
+      }
+    );
     builder.addCase(fetchTodos.rejected, (state, action) => {
-      state.error = action.error.message;
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to fetch todos";
     });
   },
 });
